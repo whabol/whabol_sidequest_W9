@@ -33,6 +33,8 @@ let groundImg, groundDeepImg;
 let attacking = false; // track if the player is attacking
 let attackFrameCounter = 0; // tracking attack animation
 
+let moonGravity = false;
+
 // --- TILE MAP ---
 // an array that uses the tile key to create the level
 let level = [
@@ -219,6 +221,25 @@ function draw() {
     }
   }
 
+  // --debug moonGravity on/off toggle
+  if (kb.presses("g")) {
+    moonGravity = !moonGravity;
+
+    if (moonGravity) {
+      world.gravity.y = 10 / 4;
+    } else {
+      world.gravity.y = 10;
+    }
+  }
+
   // --- KEEP IN VIEW ---
   player.pos.x = constrain(player.pos.x, FRAME_W / 2, VIEWW - FRAME_W / 2);
+
+  // debug toggle UI
+  camera.off();
+  fill(255);
+  stroke(0);
+  textSize(10);
+  text("Moon Gravity: " + (moonGravity ? "ON" : "OFF"), 10, 20);
+  camera.on();
 }
