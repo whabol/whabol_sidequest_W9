@@ -33,7 +33,9 @@ let groundImg, groundDeepImg;
 let attacking = false; // track if the player is attacking
 let attackFrameCounter = 0; // tracking attack animation
 
+let debugMenu = false;
 let moonGravity = false;
+let slowMode = false;
 
 // --- TILE MAP ---
 // an array that uses the tile key to create the level
@@ -135,6 +137,8 @@ function setup() {
   sensor.visible = false;
   let sensorJoint = new GlueJoint(player, sensor);
   sensorJoint.visible = false;
+
+  world.autoDraw = false;
 }
 
 function startMusicIfNeeded() {
@@ -210,36 +214,67 @@ function draw() {
   }
 
   // --- MOVEMENT ---
+  let speed = slowMode ? 0.5 : 1.5;
+
   if (!attacking) {
     player.vel.x = 0;
     if (kb.pressing("left")) {
-      player.vel.x = -1.5;
+      player.vel.x = -speed;
       player.mirror.x = true;
     } else if (kb.pressing("right")) {
-      player.vel.x = 1.5;
+      player.vel.x = speed;
       player.mirror.x = false;
-    }
-  }
-
-  // --debug moonGravity on/off toggle
-  if (kb.presses("g")) {
-    moonGravity = !moonGravity;
-
-    if (moonGravity) {
-      world.gravity.y = 10 / 4;
-    } else {
-      world.gravity.y = 10;
     }
   }
 
   // --- KEEP IN VIEW ---
   player.pos.x = constrain(player.pos.x, FRAME_W / 2, VIEWW - FRAME_W / 2);
 
-  // debug toggle UI
+  // -- Draw sprites --
+  allSprites.draw();
+
+  // --debug moonGravity on/off toggle
+  if (kb.presses("g")) {
+    debugMenu = !debugMenu;
+  }
+
+  //Toggle moon gravity ONLY when menu is open
+  if (debugMenu && kb.presses("m")) {
+    moonGravity = !moonGravity;
+    world.gravity.y = moonGravity ? GRAVITY / 2 : GRAVITY;
+  }
+
+  //Toggle player speed
+  if (debugMenu && kb.presses("s")) {
+    slowMode = !slowMode;
+  }
+
+  //Draws debugMenu
+  if (debugMenu) {
+    drawDebugMenu();
+  }
+}
+
+function drawDebugMenu() {
   camera.off();
+
+  //Background of pop screen menu
+  fill(0, 180);
+  rect(40, 30, 240, 120);
+
+  //Title
   fill(255);
-  stroke(0);
+  textSize(14);
+  text("DEBUG MENU", 120, 50);
+
+  //Moon gravity toggle text
   textSize(10);
-  text("Moon Gravity: " + (moonGravity ? "ON" : "OFF"), 10, 20);
+  text("Moon Gravity:" + (moonGravity ? "ON" : "OFF"), 60, 80);
+  text("Press m to toggle", 60, 95);
+
+  //Slow mode toggle text
+  text("Slow Speed:" + (slowMode ? "ON" : "OFF"), 60, 115);
+  text("Press s to toggle", 60, 130);
+
   camera.on();
 }
